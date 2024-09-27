@@ -1,6 +1,9 @@
 import { Text, View } from "react-native";
+import { Stack } from "expo-router";
+import { useUpdates } from "expo-updates";
 
 export default function Index() {
+  const { currentlyRunning } = useUpdates();
   return (
     <View
       style={{
@@ -9,7 +12,9 @@ export default function Index() {
         alignItems: "center",
       }}
     >
-      <Text>Edit app/index.tsx to edit this screen.</Text>
+      <Text>new</Text>
+      <Text>{currentlyRunning.updateId}</Text>
+      <Stack.Screen options={{ title: "Home" }} />
     </View>
   );
 }

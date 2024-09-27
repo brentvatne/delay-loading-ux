@@ -13,7 +13,8 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.brents.delay-loading-ux"
     },
     "android": {
       "adaptiveIcon": {
@@ -31,6 +32,20 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "abba13ff-9bfe-449f-8ee0-264659754b78"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/abba13ff-9bfe-449f-8ee0-264659754b78",
+      "requestHeaders": {
+        "expo-channel-name": "staging"
+      }
     }
   }
 }
