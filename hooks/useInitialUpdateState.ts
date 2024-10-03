@@ -1,38 +1,67 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 import { useUpdates } from "expo-updates";
 
 export enum UpdateCheckState {
-  Unknown = 'Unknown',
-  NativeStateInitialized = 'NativeStateInitialized',
-  NoEventsAfterInitialized = 'NoEventsAfterInitialized',
-  InProgress = 'InProgress',
-  UpdateReady = 'UpdateReady',
-  NoUpdateAvailable = 'NoUpdateAvailable',
-  Error = 'Error',
-  Timeout = 'Timeout',
+  Unknown = "Unknown",
+  NativeStateInitialized = "NativeStateInitialized",
+  NoEventsAfterInitialized = "NoEventsAfterInitialized",
+  InProgress = "InProgress",
+  UpdateReady = "UpdateReady",
+  NoUpdateAvailable = "NoUpdateAvailable",
+  Error = "Error",
+  Timeout = "Timeout",
 }
 
 const DEFAULT_TIMEOUT = 10_000;
 
 export function useInitialUpdateState(options?: { timeout?: number }) {
-  const { isChecking, isDownloading, isUpdatePending, isUpdateAvailable, downloadError, downloadedUpdate, checkError, lastCheckForUpdateTimeSinceRestart } = useUpdates();
-  const [ updateCheckState, setUpdateCheckState ] = useState<UpdateCheckState>(UpdateCheckState.Unknown);
+  const {
+    isChecking,
+    isDownloading,
+    isUpdatePending,
+    isUpdateAvailable,
+    downloadError,
+    downloadedUpdate,
+    checkError,
+    lastCheckForUpdateTimeSinceRestart,
+  } = useUpdates();
+  const [updateCheckState, setUpdateCheckState] = useState<UpdateCheckState>(
+    UpdateCheckState.Unknown,
+  );
 
   useEffect(() => {
     // Don't go backwards from these states
-    if ([UpdateCheckState.UpdateReady, UpdateCheckState.NoUpdateAvailable, UpdateCheckState.Error, UpdateCheckState.Timeout].includes(updateCheckState)) {
+    if (
+      [
+        UpdateCheckState.UpdateReady,
+        UpdateCheckState.NoUpdateAvailable,
+        UpdateCheckState.Error,
+        UpdateCheckState.Timeout,
+      ].includes(updateCheckState)
+    ) {
       return;
     }
 
     if (isUpdatePending || downloadedUpdate) {
       setUpdateCheckState(UpdateCheckState.UpdateReady);
-    } else if (checkError || downloadError) { 
+    } else if (checkError || downloadError) {
       setUpdateCheckState(UpdateCheckState.Error);
-    } else if ((isChecking || isDownloading || (!isDownloading && isUpdateAvailable)) && updateCheckState !== UpdateCheckState.InProgress) { 
+    } else if (
+      (isChecking || isDownloading || (!isDownloading && isUpdateAvailable)) &&
+      updateCheckState !== UpdateCheckState.InProgress
+    ) {
       setUpdateCheckState(UpdateCheckState.InProgress);
-    } else if ((!isChecking && !isDownloading && !isUpdateAvailable) && updateCheckState === UpdateCheckState.InProgress) {
+    } else if (
+      !isChecking &&
+      !isDownloading &&
+      !isUpdateAvailable &&
+      updateCheckState === UpdateCheckState.InProgress
+    ) {
       setUpdateCheckState(UpdateCheckState.NoUpdateAvailable);
-    } else if (lastCheckForUpdateTimeSinceRestart !== undefined && updateCheckState === UpdateCheckState.Unknown) {
+    } else if (
+      lastCheckForUpdateTimeSinceRestart !== undefined &&
+      updateCheckState === UpdateCheckState.Unknown
+    ) {
       setUpdateCheckState(UpdateCheckState.NativeStateInitialized);
       return delayedStateUpdate(() => {
         // I have never entered this state but this is a good fallback in case we initialize state but somehow never end up
@@ -47,12 +76,23 @@ export function useInitialUpdateState(options?: { timeout?: number }) {
         setUpdateCheckState(UpdateCheckState.NoEventsAfterInitialized);
       }, 16);
     }
-  }, [lastCheckForUpdateTimeSinceRestart, isChecking, isDownloading, isUpdatePending, isUpdateAvailable, updateCheckState]);
+  }, [
+    lastCheckForUpdateTimeSinceRestart,
+    isChecking,
+    isDownloading,
+    isUpdatePending,
+    isUpdateAvailable,
+    updateCheckState,
+    checkError,
+    downloadError,
+    downloadedUpdate,
+  ]);
 
   useEffect(() => {
     return delayedStateUpdate(() => {
       setUpdateCheckState(UpdateCheckState.Timeout);
     }, options?.timeout ?? DEFAULT_TIMEOUT);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return updateCheckState;

@@ -1,13 +1,27 @@
 import { Stack } from "expo-router";
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { useUpdates, reloadAsync } from "expo-updates";
 import { StatusBar } from "expo-status-bar";
-import { useInitialUpdateState, UpdateCheckState } from "../hooks/useInitialUpdateState";
+import {
+  useInitialUpdateState,
+  UpdateCheckState,
+} from "../hooks/useInitialUpdateState";
 
-function CheckForLatestUpdateOnceOnLaunch(props: { onComplete: (options?: { timedOut?: boolean }) => void, timeout?: number }) {
+function CheckForLatestUpdateOnceOnLaunch(props: {
+  onComplete: (options?: { timedOut?: boolean }) => void;
+  timeout?: number;
+}) {
   const state = useInitialUpdateState({ timeout: props.timeout });
-  const { isChecking, isDownloading, isUpdatePending, isUpdateAvailable, downloadError, checkError, lastCheckForUpdateTimeSinceRestart } = useUpdates();
+  const {
+    isChecking,
+    isDownloading,
+    isUpdatePending,
+    isUpdateAvailable,
+    downloadError,
+    checkError,
+    lastCheckForUpdateTimeSinceRestart,
+  } = useUpdates();
 
   useEffect(() => {
     if (state === UpdateCheckState.UpdateReady) {
@@ -15,28 +29,46 @@ function CheckForLatestUpdateOnceOnLaunch(props: { onComplete: (options?: { time
       requestAnimationFrame(() => reloadAsync());
     } else if (state === UpdateCheckState.Timeout) {
       props.onComplete({ timedOut: true });
-    } else if ([UpdateCheckState.NoUpdateAvailable, UpdateCheckState.Error, UpdateCheckState.NoEventsAfterInitialized].includes(state)) {
+    } else if (
+      [
+        UpdateCheckState.NoUpdateAvailable,
+        UpdateCheckState.Error,
+        UpdateCheckState.NoEventsAfterInitialized,
+      ].includes(state)
+    ) {
       props.onComplete();
-    } else {} // In any other state we're just waiting
-
-  }, [state]);
+    } else {
+    } // In any other state we're just waiting
+  }, [props, state]);
 
   // Put your beautiful loading UI here
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#fff" }}>
+    <View
+      style={{
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#fff",
+      }}
+    >
       <>
         <ActivityIndicator size="large" color="#ccc" />
         <Text style={{ fontSize: 20, marginTop: 10 }}>Preparing the app</Text>
         <Text>
-          Current state: {JSON.stringify({
-            isChecking,
-            isDownloading,
-            isUpdatePending,
-            isUpdateAvailable,
-            downloadError,
-            checkError,
-            lastCheckForUpdateTimeSinceRestart
-          }, null, 2)}
+          Current state:{" "}
+          {JSON.stringify(
+            {
+              isChecking,
+              isDownloading,
+              isUpdatePending,
+              isUpdateAvailable,
+              downloadError,
+              checkError,
+              lastCheckForUpdateTimeSinceRestart,
+            },
+            null,
+            2,
+          )}
         </Text>
       </>
       <StatusBar style="auto" />
@@ -45,7 +77,9 @@ function CheckForLatestUpdateOnceOnLaunch(props: { onComplete: (options?: { time
 }
 
 export default function RootLayout() {
-  const [initialCheckInProgress, setInitialCheckInProgress] = useState<boolean | undefined>(undefined);
+  const [initialCheckInProgress, setInitialCheckInProgress] = useState<
+    boolean | undefined
+  >(undefined);
 
   if (initialCheckInProgress === undefined) {
     return (
