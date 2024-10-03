@@ -35,12 +35,15 @@ export function useInitialUpdateState(options?: { timeout?: number }) {
     } else if (lastCheckForUpdateTimeSinceRestart !== undefined && updateCheckState === UpdateCheckState.Unknown) {
       setUpdateCheckState(UpdateCheckState.NativeStateInitialized);
       return delayedStateUpdate(() => {
+        // I have never entered this state but this is a good fallback in case we initialize state but somehow never end up
+        // without any subsequent events firing. If nothing happens withi 100ms of the original native event firing, then
+        // we assume something is wrong and bail out
         setUpdateCheckState(UpdateCheckState.NoEventsAfterInitialized);
       }, 100);
     } else if (updateCheckState === UpdateCheckState.Unknown) {
-      // This handles the case where we don't actually check for updates on launch, eg: after reloadAsync
-      // If it has taken more than a frame for the updates state to be populated then we can assume we won't be checking
       return delayedStateUpdate(() => {
+        // This handles the case where we don't actually check for updates on launch, eg: after reloadAsync(), or if you
+        // end up using this hook in an app that doesn't automatically check for updates on launch.
         setUpdateCheckState(UpdateCheckState.NoEventsAfterInitialized);
       }, 16);
     }
