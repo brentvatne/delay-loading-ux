@@ -36,7 +36,7 @@ export function useInitialUpdateState(options?: { timeout?: number }) {
       setUpdateCheckState(UpdateCheckState.NativeStateInitialized);
       return delayedStateUpdate(() => {
         // I have never entered this state but this is a good fallback in case we initialize state but somehow never end up
-        // without any subsequent events firing. If nothing happens withi 100ms of the original native event firing, then
+        // without any subsequent events firing. If nothing happens within 100ms of the original native event firing, then
         // we assume something is wrong and bail out
         setUpdateCheckState(UpdateCheckState.NoEventsAfterInitialized);
       }, 100);
